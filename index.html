@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Discover the Founding Values</title>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<!-- <script src="http://s1.damasistem.com:3000/socket.io/socket.io.js"></script> -->
+
+<script src="/socket.io/socket.io.js"></script>
+
+<style type="text/css">
+.container {display: flex;flex-direction: row;align-items: center;}
+.canvasArea { display: flex;flex-direction: column;width: 50%;padding: 20px }
+#allRoomUsers{width: 100%; border: 2px solid #023047;border-radius: 6px;height:300px  }
+.phone{background: red;padding: 20px;width: 300px;height: 600px}
+.paintTools { display: flex;flex-direction: row;padding: 20px }
+.ready {display: flex;justify-content: center;align-items: center; cursor: pointer;margin-top: 10px;border: 1px solid #219EBC;padding: 10px;border-radius: 6px;background: #219EBC;color: #fff;font-size: 18px;text-align: center;}
+#readyCount {text-align: center;}
+.pencil {margin-right: 10px;display: flex;justify-content: center;align-items: center; cursor: pointer;background: transparent;}
+.rightSide{width: 400px;height: 500px;margin-left: 50px;}
+.countDown { font-size: 20px;text-align: center;padding: 20px }
+.questionArea {width: 100%;height: 90%; border:1px solid #023047;border-radius: 6px ;display: flex;justify-content: center;flex-direction: column;align-items: center; }
+.answerArea { display: none;flex-direction: column;justify-content: center;align-items: center;height: 100%;width: 100%}
+.answer{ display: flex;justify-content: center;align-items: center; cursor: pointer;margin-top: 10px;border: 1px solid #219EBC;padding: 10px;border-radius: 6px;background: #219EBC;color: #fff;font-size: 18px;text-align: center;width: 70%;margin-bottom: 30px}
+.onlyQuestionArea{ display: none;justify-content: center;align-items: center;height: 100%;width: 100%}
+.onlyQuestionArea h1{ width: 80%;border: 1px solid #219EBC;padding: 10px;border-radius: 6px;background: #219EBC;color: #fff;font-size: 16px;text-align: center; }
+.buttonred { background:red!important};
+.buttongreen { background:greenyellow!important; };
+.userArea { width:100% };
+</style>
+
+</head>
+<body>
+	<div class="container">
+		<div class="canvasArea">
+			<div >
+				<h1 id="readyCount">Ready 0 / 0</h1>
+			</div>
+			<div >
+				<h1 id="namearea">özgün</h1>
+			</div>
+			<div id="allRoomUsers"></div>
+
+			<button class="ready" type="button" onclick="join()">
+				Join
+			</button>
+			<button class="ready buttonred" id="readyButton" type="button" onclick="readyFunc()">
+				Ready
+			</button>
+			<button class="ready" type="button" onclick="leaveRoom()">
+				Leave Room
+			</button>
+
+			<button class="ready" type="button" onclick="getAllUsers()">
+				Request All Users
+			</button>
+			
+		</div>
+
+		<div class="rightSide">
+			<div class="countDown">Room Users</div>
+			<div class="questionArea">
+				
+				<div class='onlyQuestionArea'>
+					<h1>Deneme </h1>
+				</div>
+
+				<ul class="userArea">
+
+					
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+	
+	
+	<script>
+
+		$(function(){
+			var adjective = ["Excited", "Anxious", "Overweight", "Demonic", "Jumpy", "Misunderstood", "Squashed", "Gargantuan","Broad", "Crooked", "Curved", "Deep", "Even","Excited", "Anxious", "Overweight", "Demonic", "Jumpy", "Misunderstood", "Squashed", "Gargantuan","Broad", "Crooked", "Curved", "Deep", "Even", "Flat", "Hilly", "Jagged", "Round", "Shallow", "Square", "Steep", "Straight", "Thick", "Thin", "Cooing", "Deafening", "Faint", "Harsh", "High-pitched", "Hissing", "Hushed", "Husky", "Loud", "Melodic", "Moaning", "Mute", "Noisy", "Purring", "Quiet", "Raspy", "Screeching", "Shrill", "Silent", "Soft", "Squeaky", "Squealing", "Thundering", "Voiceless", "Whispering"] 
+			var object = ["Taco", "Operating System", "Sphere", "Watermelon", "Cheeseburger", "Apple Pie", "Spider", "Dragon", "Remote Control", "Soda", "Barbie Doll", "Watch", "Purple Pen", "Dollar Bill", "Stuffed Animal", "Hair Clip", "Sunglasses", "T-shirt", "Purse", "Towel", "Hat", "Camera", "Hand Sanitizer Bottle", "Photo", "Dog Bone", "Hair Brush", "Birthday Card"]
+
+			function generator() {return adjective[Math.floor(Math.random() * adjective.length)] + " " + object[Math.floor(Math.random() * object.length)];}
+			function randomnumber() { return Math.floor(Math.random() * 100000);}
+
+			var name = generator();
+
+			var socket = io.connect(':3002',{query:{
+				auth:JSON.stringify({
+					indexnumber:randomnumber(),mail:'asd@mail.com',username:name,friends:[],armatureId:1
+				})
+			}});
+			
+			$('#namearea')[0].innerHTML = name;
+			var roomusers = [];
+			socket.on("allRoomUsers",(a)=>{
+				var user = JSON.parse(a)
+				var userArea = $('.userArea')[0];
+				var allli = $('li');
+
+				for (var i = 0; i < user.length; i++) {
+					if(roomusers.length !=0){
+						if(!roomusers.includes(user[i].indexnumber)){
+							var li = document.createElement('li');
+		            		li.setAttribute('id',user[i].indexnumber);
+		            		li.innerHTML = user[i].username;
+							userArea.appendChild(li)
+							roomusers.push(user[i].indexnumber)
+						}
+					}else{
+						var li = document.createElement('li');
+		            		li.setAttribute('id',user[i].indexnumber);
+		            		li.innerHTML = user[i].username;
+							userArea.appendChild(li)
+							roomusers.push(user[i].indexnumber)
+					}
+				}
+			})
+
+			socket.on("allRoomUsersName",(users)=>{
+				var tbl = $("table");
+				if(tbl){ tbl.remove(); }
+				tableCreate(users);
+			})
+
+			function tableCreate(users) {
+			  var allRoomUsers = $('#allRoomUsers')[0];
+			  var tbl = document.createElement('table');
+			  tbl.style.width = '100%';
+			  tbl.setAttribute('border', '1');
+			  var tbdy = document.createElement('tbody');
+			  for (var i = 0; i < users.length; i++) {
+			    var tr = document.createElement('tr');
+			    for (var j = 0; j < 4; j++) {
+			     
+			        var td = document.createElement('td');
+			        if(j == 0){
+			       	 td.appendChild(document.createTextNode(users[i].roomId))
+
+			        }else if(j == 1){
+			       	 td.appendChild(document.createTextNode(users[i].name))
+			        }else if(j == 2){
+			       	 td.appendChild(document.createTextNode(users[i].userindexnumber))
+			        }else{
+			       	 td.appendChild(document.createTextNode(users[i].usersocketid))
+			        }
+			        tr.appendChild(td)
+			    }
+			    tbdy.appendChild(tr);
+			  }
+			  tbl.appendChild(tbdy);
+			  allRoomUsers.appendChild(tbl)
+			}
+
+			socket.on("userLeaveRoom",(a)=>{
+				roomusers.splice(roomusers.indexOf(a),1);
+				$("#"+a).remove();
+			})
+
+			let ready = false;
+			var readyButton = $('#readyButton');
+
+			join =()=>{ socket.emit('joiningRoom'); }
+
+			readyFunc =()=>{
+				ready = !ready;
+				
+				readyButton.toggleClass("buttongreen")
+				readyButton.toggleClass("buttonred")
+				
+				socket.emit('userReady',ready);
+			}
+
+			leaveRoom = () => { socket.emit('userReady',true); }
+			getAllUsers = () => { socket.emit('allRoomUsersName',1); }
+			
+		});
+	</script>
+</body>
+</html>
